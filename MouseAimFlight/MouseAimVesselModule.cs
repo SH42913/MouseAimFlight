@@ -24,8 +24,6 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-using System;
-using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
@@ -37,14 +35,14 @@ namespace MouseAimFlight
 
         AdaptivePID pilot;
         FlightBehavior flightMode;
+        bool mouseAimActive;
 
-        static Vessel prevActiveVessel = null;
-        bool mouseAimActive = false;
-        static bool freeLook = false;
-        static bool prevFreeLook = false;
-        static bool forceCursorResetNextFrame = false;
-        static bool pitchYawOverrideMouseAim = false;
-        static FieldInfo freeLookKSPCameraField = null;
+        static Vessel prevActiveVessel;
+        static bool freeLook;
+        static bool prevFreeLook;
+        static bool forceCursorResetNextFrame;
+        static bool pitchYawOverrideMouseAim;
+        static FieldInfo freeLookKSPCameraField;
         
         Vector3 upDirection;
         Vector3 targetPosition;
@@ -87,8 +85,10 @@ namespace MouseAimFlight
             TweakControlSurfaces(mouseAimActive); //Remove when stock control surfaces are fixed
         }
 
-        void Start()
+        protected override void OnStart()
         {
+            base.OnStart();
+
             vessel.OnAutopilotUpdate += MouseAimPilot;
 
             pilot = new AdaptivePID();

@@ -3,9 +3,7 @@ Copyright (c) 2016, ferram4, tetryds
 All rights reserved.
 */
 
-using System;
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEngine;
 
 namespace MouseAimFlight

@@ -58,3 +58,5 @@ DesignTimeResolveAssemblyReferencesInput.cache
 /MouseAimFlight/obj/
 /MouseAimFlight/bin/
 .vs/
+.idea/
+*.DotSettings.user
