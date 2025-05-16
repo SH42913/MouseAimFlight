@@ -4,7 +4,7 @@ All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
- 
+
 * Redistributions of source code must retain the above copyright notice, this
   list of conditions and the following disclaimer.
 
@@ -43,7 +43,7 @@ namespace MouseAimFlight
         static bool forceCursorResetNextFrame;
         static bool pitchYawOverrideMouseAim;
         static FieldInfo freeLookKSPCameraField;
-        
+
         Vector3 upDirection;
         Vector3 targetPosition;
         Vector3 mouseAimScreenLocation;
@@ -80,7 +80,7 @@ namespace MouseAimFlight
                 Cursor.visible = true;
                 ScreenMessages.PostScreenMessage("MAF Disabled");
             }
-            targetPosition = vesselTransform.up * 5000f;     //if it's activated, set it to the baseline
+            targetPosition = vesselTransform.up * 5000f; //if it's activated, set it to the baseline
             UpdateCursorScreenLocation();
             TweakControlSurfaces(mouseAimActive); //Remove when stock control surfaces are fixed
         }
@@ -95,11 +95,11 @@ namespace MouseAimFlight
             flightMode = new FlightBehavior();
 
             vesselTransform = vessel.ReferenceTransform;
-            targetPosition = vesselTransform.up * 5000;     //if it's activated, set it to the baseline
+            targetPosition = vesselTransform.up * 5000; //if it's activated, set it to the baseline
 
             FieldInfo[] cameraMouseLookStaticFields = typeof(CameraMouseLook).GetFields(BindingFlags.NonPublic | BindingFlags.Static);
             freeLookKSPCameraField = cameraMouseLookStaticFields[0];
-            
+
         }
 
         void OnGUI()
@@ -125,8 +125,8 @@ namespace MouseAimFlight
                     ToggleMouseAim();
                 //forceCursorResetNextFrame = true;
                 return;
-            } 
-            
+            }
+
             bool enableHotkeys = !MapView.MapIsEnabled && !InputLockManager.IsAllLocked(ControlTypes.KEYBOARDINPUT);
             if (vessel == FlightGlobals.ActiveVessel && vessel != prevActiveVessel)
             {
@@ -257,14 +257,10 @@ namespace MouseAimFlight
         {
             Vector3 localAngVel = vessel.angularVelocity * Mathf.Rad2Deg;
 
-            float terrainAltitude;
-            float dynPressure;
-            float velocity;
-
             //Setup
-            terrainAltitude = (float)vessel.heightFromTerrain;
-            dynPressure = (float)vessel.dynamicPressurekPa;
-            velocity = (float)vessel.srfSpeed;
+            float terrainAltitude = vessel.heightFromTerrain;
+            float dynPressure = (float)vessel.dynamicPressurekPa;
+            float velocity = (float)vessel.srfSpeed;
 
             float upWeighting = pilot.UpWeighting(terrainAltitude, velocity);
 
@@ -283,26 +279,26 @@ namespace MouseAimFlight
 
         void TweakControlSurfaces(bool mouseFlightActive) //Tweak stock control surfaces for sane behavior
         {
-            if (!MouseAimSettings.FARLoaded)
+            if (MouseAimSettings.FARLoaded)
+                return;
+
+            if (mouseFlightActive)
             {
-                if (mouseFlightActive)
+                foreach (var ctrlSurface in vessel.FindPartModulesImplementing<ModuleControlSurface>()) //Only use if not performance critical, really.
                 {
-                    foreach (var ctrlSurface in vessel.FindPartModulesImplementing<ModuleControlSurface>()) //Only use if not performance critical, really.
-                    {
-                        ctrlSurface.useExponentialSpeed = true;
-                        ctrlSurface.actuatorSpeed *= 3.5f;
-                    }
-                    Debug.Log("[MAF]: MAF Enabled, Control Surfaces Tweaked");
+                    ctrlSurface.useExponentialSpeed = true;
+                    ctrlSurface.actuatorSpeed *= 3.5f;
                 }
-                else
+                Debug.Log("[MAF]: MAF Enabled, Control Surfaces Tweaked");
+            }
+            else
+            {
+                foreach (var ctrlSurface in vessel.FindPartModulesImplementing<ModuleControlSurface>()) //Only use if not performance critical, really.
                 {
-                    foreach (var ctrlSurface in vessel.FindPartModulesImplementing<ModuleControlSurface>()) //Only use if not performance critical, really.
-                    {
-                        ctrlSurface.useExponentialSpeed = false;
-                        ctrlSurface.actuatorSpeed /= 3.5f;
-                    }
-                    Debug.Log("[MAF]: MAF Disabled, Control Surfaces Reverted");
+                    ctrlSurface.useExponentialSpeed = false;
+                    ctrlSurface.actuatorSpeed /= 3.5f;
                 }
+                Debug.Log("[MAF]: MAF Disabled, Control Surfaces Reverted");
             }
         }
 

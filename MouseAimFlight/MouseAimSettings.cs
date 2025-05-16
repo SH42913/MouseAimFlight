@@ -36,12 +36,14 @@ namespace MouseAimFlight
                 string tmp = value.ToUpperInvariant();
                 string oldKeyString = toggleKeyString;
                 KeyCode oldKeyCode = toggleKeyCode;
-                if(tmp != toggleKeyString && tmp.Length == 1)
+                if (tmp != toggleKeyString && tmp.Length == 1)
                 {
-                    try {
+                    try
+                    {
                         toggleKeyString = tmp;
                         toggleKeyCode = (KeyCode)Enum.Parse(typeof(KeyCode), toggleKeyString);
-                    } catch (ArgumentException) {
+                    } catch (ArgumentException)
+                    {
                         // invalid keycode
                         toggleKeyString = oldKeyString;
                         toggleKeyCode = oldKeyCode;
@@ -68,10 +70,12 @@ namespace MouseAimFlight
                 KeyCode oldKeyCode = flightModeKeyCode;
                 if (tmp != flightModeKeyString && tmp.Length == 1)
                 {
-                    try {
+                    try
+                    {
                         flightModeKeyString = tmp;
                         flightModeKeyCode = (KeyCode)Enum.Parse(typeof(KeyCode), flightModeKeyString);
-                    } catch (ArgumentException) {
+                    } catch (ArgumentException)
+                    {
                         // invalid keycode
                         flightModeKeyString = oldKeyString;
                         flightModeKeyCode = oldKeyCode;
@@ -146,8 +150,8 @@ namespace MouseAimFlight
             }
         }
 
-        static bool invertY = false;
-        static bool invertX = false;
+        static bool invertY;
+        static bool invertX;
         public static bool InvertYAxis
         {
             get { return invertY; }
@@ -191,54 +195,60 @@ namespace MouseAimFlight
 
         void LoadSettings()
         {
-            foreach(ConfigNode node in GameDatabase.Instance.GetConfigNodes("MAFSettings"))
-                if((object)node != null)
+            foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("MAFSettings"))
+            {
+                if (node == null)
+                    continue;
+
+                if (node.HasValue("toggleKey"))
                 {
-                    if (node.HasValue("toggleKey"))
+                    try
                     {
-                        try {
-                            toggleKeyString = ((string)node.GetValue("toggleKey")).ToUpperInvariant();
-                            toggleKeyCode = (KeyCode)Enum.Parse(typeof(KeyCode), toggleKeyString);
-                        } catch (ArgumentException) {
-                            Debug.Log("[MAF]: Invalid keycode in toggleKey config node; skipped");
-                        }
-                    }
-                    if (node.HasValue("flightModeKey"))
+                        toggleKeyString = node.GetValue("toggleKey").ToUpperInvariant();
+                        toggleKeyCode = (KeyCode)Enum.Parse(typeof(KeyCode), toggleKeyString);
+                    } catch (ArgumentException)
                     {
-                        try {
-                            flightModeKeyString = ((string)node.GetValue("flightModeKey")).ToUpperInvariant();
-                            flightModeKeyCode = (KeyCode)Enum.Parse(typeof(KeyCode), flightModeKeyString);
-                        } catch (ArgumentException) {
-                            Debug.Log("[MAF]: Invalid keycode in flightModeKey config node; skipped");
-                        }
-                    }
-                    if (node.HasValue("cursorStyle"))
-                    {
-                        object temp = Enum.Parse(typeof(CursorStyle), (string)node.GetValue("cursorStyle"));
-                        if (temp != null)
-                            cursor = (CursorStyle)temp;
-                    }
-                    if (node.HasValue("mouseSensitivity"))
-                    {
-                        int.TryParse(node.GetValue("mouseSensitivity"), out mouseSensitivity);
-                    }
-                    if (node.HasValue("cursorOpacity"))
-                    {
-                        float.TryParse(node.GetValue("cursorOpacity"), out cursorOpacity);
-                    }
-                    if (node.HasValue("cursorSize"))
-                    {
-                        float.TryParse(node.GetValue("cursorSize"), out cursorSize);
-                    }
-                    if (node.HasValue("invertX"))
-                    {
-                        bool.TryParse(node.GetValue("invertX"), out invertX);
-                    }
-                    if (node.HasValue("invertY"))
-                    {
-                        bool.TryParse(node.GetValue("invertY"), out invertX);
+                        Debug.Log("[MAF]: Invalid keycode in toggleKey config node; skipped");
                     }
                 }
+                if (node.HasValue("flightModeKey"))
+                {
+                    try
+                    {
+                        flightModeKeyString = node.GetValue("flightModeKey").ToUpperInvariant();
+                        flightModeKeyCode = (KeyCode)Enum.Parse(typeof(KeyCode), flightModeKeyString);
+                    } catch (ArgumentException)
+                    {
+                        Debug.Log("[MAF]: Invalid keycode in flightModeKey config node; skipped");
+                    }
+                }
+                if (node.HasValue("cursorStyle"))
+                {
+                    object temp = Enum.Parse(typeof(CursorStyle), node.GetValue("cursorStyle"));
+                    if (temp != null)
+                        cursor = (CursorStyle)temp;
+                }
+                if (node.HasValue("mouseSensitivity"))
+                {
+                    int.TryParse(node.GetValue("mouseSensitivity"), out mouseSensitivity);
+                }
+                if (node.HasValue("cursorOpacity"))
+                {
+                    float.TryParse(node.GetValue("cursorOpacity"), out cursorOpacity);
+                }
+                if (node.HasValue("cursorSize"))
+                {
+                    float.TryParse(node.GetValue("cursorSize"), out cursorSize);
+                }
+                if (node.HasValue("invertX"))
+                {
+                    bool.TryParse(node.GetValue("invertX"), out invertX);
+                }
+                if (node.HasValue("invertY"))
+                {
+                    bool.TryParse(node.GetValue("invertY"), out invertX);
+                }
+            }
             DetectFARLoaded();
         }
 
@@ -273,7 +283,7 @@ namespace MouseAimFlight
                     FARLoaded = false;
             }
 
-            if(FARLoaded)
+            if (FARLoaded)
                 Debug.Log("[MAF]: FAR loaded, disabling control surfaces tweaks");
             else
                 Debug.Log("[MAF]: Stock aero model loaded, ready to tweak control surfaces");

@@ -4,7 +4,7 @@ All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
- 
+
 * Redistributions of source code must retain the above copyright notice, this
   list of conditions and the following disclaimer.
 
@@ -34,8 +34,8 @@ namespace MouseAimFlight
     {
         static MouseAimFlightSceneGUI instance;
         public static MouseAimFlightSceneGUI Instance { get { return instance; } }
-        static ApplicationLauncherButton mAFButton = null;
-        static bool showGUI = false;
+        static ApplicationLauncherButton mAFButton;
+        static bool showGUI;
         static Rect guiRect;
 
         static Texture2D vesselForwardReticle;
@@ -123,12 +123,12 @@ namespace MouseAimFlight
             GUILayout.Space(10);
 
             GUILayout.BeginHorizontal(GUILayout.Width(200));
-            if(GUILayout.Button("Cursor: ", GUILayout.Width(100)))
+            if (GUILayout.Button("Cursor: ", GUILayout.Width(100)))
                 CycleCursor();
-            Color oldcolor = GUI.color;
+            Color oldColor = GUI.color;
             GUI.color = new Color(1, 1, 1, MouseAimSettings.CursorOpacity);
             GUI.DrawTexture(new Rect(125, 100, 60, 60), vesselForwardReticle);
-            GUI.color = oldcolor;
+            GUI.color = oldColor;
             GUILayout.EndHorizontal();
 
             GUILayout.Space(10);
@@ -157,10 +157,10 @@ namespace MouseAimFlight
 
             UpdateCursor(MouseAimSettings.Cursor);
         }
-        
+
         void UpdateCursor(MouseAimSettings.CursorStyle cursor)
         {
-            if(cursor == MouseAimSettings.CursorStyle.FULL)
+            if (cursor == MouseAimSettings.CursorStyle.FULL)
                 vesselForwardReticle = vesselForwardCross;
             else if (cursor == MouseAimSettings.CursorStyle.DOT)
                 vesselForwardReticle = vesselForwardDot;
@@ -168,32 +168,34 @@ namespace MouseAimFlight
                 vesselForwardReticle = vesselForwardBlank;
         }
 
-       #region AppLauncher
+        #region AppLauncher
+
         public void OnGUIAppLauncherReady()
         {
             if (mAFButton == null)
             {
                 mAFButton = ApplicationLauncher.Instance.AddModApplication(
-                    onAppLaunchToggleOn,
-                    onAppLaunchToggleOff,
+                    OnAppLaunchToggleOn,
+                    OnAppLaunchToggleOff,
                     null,
                     null,
                     null,
                     null,
                     ApplicationLauncher.AppScenes.FLIGHT,
-                    (Texture)GameDatabase.Instance.GetTexture("MouseAimFlight/Assets/MAF_icon", false));
+                    GameDatabase.Instance.GetTexture("MouseAimFlight/Assets/MAF_icon", false));
             }
         }
 
-        void onAppLaunchToggleOn()
+        void OnAppLaunchToggleOn()
         {
             showGUI = true;
         }
 
-        void onAppLaunchToggleOff()
+        void OnAppLaunchToggleOff()
         {
             showGUI = false;
         }
+
         #endregion
     }
 }

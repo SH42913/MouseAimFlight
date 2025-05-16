@@ -9,9 +9,9 @@ namespace MouseAimFlight
 {
     class AdaptivePID
     {
-        public PID pitchPID;
-        public PID rollPID;
-        public PID yawPID;
+        readonly PID pitchPID;
+        readonly PID rollPID;
+        readonly PID yawPID;
 
         float pitchP = 0.2f, pitchI = 0.1f, pitchD = 0.08f;
         float rollP = 0.01f, rollI = 0.0f, rollD = 0.005f;
@@ -48,26 +48,18 @@ namespace MouseAimFlight
 
             float steerPitch = pitchPID.Simulate(pitchError, angVel.x, pIntLimit * trimFactor, timestep, speedFactor);
             float steerRoll = rollPID.Simulate(rollError, angVel.y, rIntLimit, timestep, speedFactor);
-            if (pitchPID.IntegralZeroed)        //yaw integrals should be zeroed at the same time that pitch PIDs are zeroed, because that happens in large turns
+            if (pitchPID.IntegralZeroed) //yaw integrals should be zeroed at the same time that pitch PIDs are zeroed, because that happens in large turns
                 yawPID.ZeroIntegral();
             float steerYaw = yawPID.Simulate(yawError, angVel.z, yIntLimit, timestep, speedFactor);
 
-            Steer steer = new Steer (steerPitch, steerRoll, steerYaw);
-
-            return steer;
+            return new Steer(steerPitch, steerRoll, steerYaw);
         }
-        
-        void AdaptGains(float pitchError, float rollError, float yawError, UnityEngine.Vector3 angVel, float terrainAltitude, float timestep, float dynPress, float vel, float trimFactor) //should remove trimfactor
-        {
-            //There will be some cool code in here in the future.
-        }
-
     }
-    public struct Steer
+    public readonly struct Steer
     {
-        public float pitch;
-        public float roll;
-        public float yaw;
+        public readonly float pitch;
+        public readonly float roll;
+        public readonly float yaw;
 
         public Steer(float p, float r, float y)
         {

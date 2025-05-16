@@ -5,12 +5,7 @@ namespace MouseAimFlight.FlightModes
 {
     class AggressiveFlight : Flight
     {
-        private static string flightMode = "Aggressive Flight";
-
-        public AggressiveFlight()
-        {
-
-        }
+        const string FlightMode = "Aggressive Flight";
 
         public override ErrorData Simulate(Transform vesselTransform, Transform velocityTransform, Vector3 targetPosition, Vector3 upDirection, float upWeighting, Vessel vessel)
         {
@@ -20,34 +15,24 @@ namespace MouseAimFlight.FlightModes
                 velocityTransform.rotation = Quaternion.LookRotation(srfVel, -vesselTransform.forward);
             }
             velocityTransform.rotation = Quaternion.AngleAxis(90, velocityTransform.right) * velocityTransform.rotation;
-            Vector3 localAngVel = vessel.angularVelocity * Mathf.Rad2Deg;
 
-            Vector3d targetDirection;
-            Vector3d targetDirectionYaw;
+            Vector3d targetDirection = vesselTransform.InverseTransformDirection(targetPosition - vessel.CurrentCoM).normalized;
+            Vector3d targetDirectionYaw = targetDirection;
 
-            targetDirection = vesselTransform.InverseTransformDirection(targetPosition - vessel.CurrentCoM).normalized;
-            targetDirectionYaw = targetDirection;
+            float sideslip = (float)Math.Asin(Vector3.Dot(vesselTransform.right, vessel.srf_velocity.normalized)) * Mathf.Rad2Deg;
 
-            float pitchError;
-            float rollError;
-            float yawError;
-
-            float sideslip;
-
-            sideslip = (float)Math.Asin(Vector3.Dot(vesselTransform.right, vessel.srf_velocity.normalized)) * Mathf.Rad2Deg;
-
-            pitchError = (float)Math.Asin(Vector3d.Dot(Vector3d.back, VectorUtils.Vector3dProjectOnPlane(targetDirection, Vector3d.right))) * Mathf.Rad2Deg;
-            yawError = (float)Math.Asin(Vector3d.Dot(Vector3d.right, VectorUtils.Vector3dProjectOnPlane(targetDirectionYaw, Vector3d.forward))) * Mathf.Rad2Deg;
+            float pitchError = (float)Math.Asin(Vector3d.Dot(Vector3d.back, VectorUtils.Vector3dProjectOnPlane(targetDirection, Vector3d.right))) * Mathf.Rad2Deg;
+            float yawError = (float)Math.Asin(Vector3d.Dot(Vector3d.right, VectorUtils.Vector3dProjectOnPlane(targetDirectionYaw, Vector3d.forward))) * Mathf.Rad2Deg;
 
             //roll
             Vector3 currentRoll = -vesselTransform.forward;
-            Vector3 rollTarget;
 
-            rollTarget = (targetPosition + Mathf.Clamp(upWeighting * (100f - Math.Abs(yawError * 1.6f) - (pitchError * 2.8f)), 0, float.PositiveInfinity) * upDirection) - vessel.CoM;
+            Vector3 rollTarget = (targetPosition + Mathf.Clamp(upWeighting * (100f - Math.Abs(yawError * 1.6f) - (pitchError * 2.8f)), 0, float.PositiveInfinity) * upDirection) -
+                                 vessel.CoM;
 
             rollTarget = Vector3.ProjectOnPlane(rollTarget, vesselTransform.up);
 
-            rollError = VectorUtils.SignedAngle(currentRoll, rollTarget, vesselTransform.right) - sideslip * (float)Math.Sqrt(vessel.srf_velocity.magnitude) / 5;
+            float rollError = VectorUtils.SignedAngle(currentRoll, rollTarget, vesselTransform.right) - sideslip * (float)Math.Sqrt(vessel.srf_velocity.magnitude) / 5;
 
             float pitchDownFactor = pitchError * (10 / ((float)Math.Pow(yawError, 2) + 10f) - 0.1f);
             rollError += Math.Sign(rollError) * Math.Abs(Mathf.Clamp(pitchDownFactor, -15, 0));
@@ -55,7 +40,7 @@ namespace MouseAimFlight.FlightModes
             //pitchError -= Math.Abs(Mathf.Clamp(rollError, -pitchError, +pitchError) / 3);
 
             pitchError += 1 - Mathf.Exp(-pitchError);
-            
+
             ErrorData behavior = new ErrorData(pitchError, rollError, yawError);
 
             return behavior;
@@ -63,7 +48,7 @@ namespace MouseAimFlight.FlightModes
 
         public override string GetFlightMode()
         {
-            return flightMode;
+            return FlightMode;
         }
     }
 }
